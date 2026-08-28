@@ -1,69 +1,136 @@
-import Image from "next/image";
+import { getCurrentUser, getPartnerUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { format } from "date-fns";
+import { TaskItem, TaskForm } from "@/components/TaskComponents";
+import { PriorityForm, ReminderForm } from "@/components/OtherComponents";
+import { DailyReportForm } from "@/components/ReportComponents";
 
-export default function Home() {
+export default async function DailyPage() {
+  const currentUser = await getCurrentUser();
+  const partnerUser = await getPartnerUser(currentUser.id);
+  
+  if (!partnerUser) return <div>Partner user not found. Did you run the seed script?</div>;
+  
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const displayDate = format(new Date(), "EEEE, MMMM d, yyyy").toUpperCase();
+  
+  // Ensure daily page exists
+  await prisma.dailyPage.upsert({
+    where: { date: todayStr },
+    update: {},
+    create: { date: todayStr }
+  });
+  
+  const tasks = await prisma.task.findMany({
+    where: { date: todayStr },
+    include: { assignedTo: true }
+  });
+  
+  const priorities = await prisma.priority.findMany({
+    where: { date: todayStr }
+  });
+  
+  const reminders = await prisma.reminder.findMany({
+    where: { status: "active" }
+  });
+  
+  const currentUserReport = await prisma.dailyReport.findUnique({
+    where: { date_userId: { date: todayStr, userId: currentUser.id } }
+  });
+  
+  const partnerUserReport = await prisma.dailyReport.findUnique({
+    where: { date_userId: { date: todayStr, userId: partnerUser.id } }
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="page-turn-anim">
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h2 style={{ fontFamily: 'var(--font-lora)', fontSize: '2rem', letterSpacing: '0.1em' }}>
+          {displayDate}
+        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', color: 'var(--text-secondary-brown)', marginTop: '8px' }}>
+          <span style={{ fontFamily: 'var(--font-caveat)', fontSize: '1.2rem' }}>Hi {currentUser.name}!</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+      
+      <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+        
+        {/* Left Column */}
+        <div style={{ flex: '1 1 500px' }}>
+          <section style={{ marginBottom: '40px' }}>
+            <h3>TODAY</h3>
+            <div style={{ marginTop: '20px' }}>
+              {tasks.map(task => (
+                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+              ))}
+              <TaskForm currentUserId={currentUser.id} partnerUserId={partnerUser.id} date={todayStr} />
+            </div>
+          </section>
+          
+          <section style={{ marginBottom: '40px' }}>
+            <h3>DON'T FORGET</h3>
+            <div style={{ marginTop: '20px' }}>
+              {reminders.map(rem => (
+                <div key={rem.id} className="checklist-item lined-paper">
+                  <div className="checklist-circle"></div>
+                  <span className="task-text" style={{ fontFamily: 'var(--font-caveat)' }}>{rem.content}</span>
+                </div>
+              ))}
+              <ReminderForm />
+            </div>
+          </section>
         </div>
-      </main>
+        
+        {/* Right Column */}
+        <div style={{ flex: '1 1 300px' }}>
+          <section style={{ marginBottom: '40px', backgroundColor: 'rgba(118, 85, 65, 0.05)', padding: '20px', borderRadius: '8px' }}>
+            <h3>TOP PRIORITIES</h3>
+            <div style={{ marginTop: '10px' }}>
+              {priorities.map((p, i) => (
+                <div key={p.id} className="flex-row items-center mt-2">
+                  <span style={{ fontFamily: 'var(--font-caveat)', fontSize: '1.25rem', fontWeight: 'bold' }}>{i + 1}.</span>
+                  <span style={{ fontFamily: 'var(--font-caveat)', fontSize: '1.25rem' }}>{p.content}</span>
+                </div>
+              ))}
+              <PriorityForm currentUserId={currentUser.id} date={todayStr} />
+            </div>
+          </section>
+          
+          <section style={{ marginBottom: '40px' }}>
+            <h3>FOR TOMORROW</h3>
+            <div style={{ marginTop: '20px' }}>
+              <TaskForm currentUserId={currentUser.id} partnerUserId={partnerUser.id} date="tomorrow" />
+            </div>
+          </section>
+        </div>
+      </div>
+      
+      {/* Bottom Section */}
+      <div style={{ marginTop: '60px' }}>
+        <section style={{ marginBottom: '60px' }}>
+          <h3>DAILY REPORT</h3>
+          <div className="flex-row" style={{ gap: '40px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 300px' }}>
+              <DailyReportForm 
+                userId={currentUser.id} 
+                date={todayStr} 
+                existingReport={currentUserReport} 
+                isOwner={true} 
+                name={currentUser.name} 
+              />
+            </div>
+            <div style={{ flex: '1 1 300px' }}>
+              <DailyReportForm 
+                userId={partnerUser.id} 
+                date={todayStr} 
+                existingReport={partnerUserReport} 
+                isOwner={false} 
+                name={partnerUser.name} 
+              />
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

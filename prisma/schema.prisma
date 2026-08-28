@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String          @id @default(uuid())
+  name             String          // "Buddy" or "Kiddo"
+  pin              String          @unique // "4421" or "4426"
+  streak           Int             @default(0)
+  roadmap_progress Int             @default(0)
+  createdAt        DateTime        @default(now())
+  
+  tasksAssignedBy  Task[]          @relation("AssignedBy")
+  tasksAssignedTo  Task[]          @relation("AssignedTo")
+  priorities       Priority[]
+  notes            Note[]
+  gratitudes       Gratitude[]
+  dailyReports     DailyReport[]
+  activityLogs     ActivityLog[]
+}
+
+model DailyPage {
+  id        String   @id @default(uuid())
+  date      String   @unique // "YYYY-MM-DD" format
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  title        String
+  status       String    @default("pending") // "pending", "completed"
+  date         String    // "YYYY-MM-DD" or "tomorrow"
+  priority     String    @default("normal") // "normal", "high", "low"
+  category     String?
+  deadline     DateTime?
+  completedAt  DateTime?
+  
+  assignedById String
+  assignedBy   User      @relation("AssignedBy", fields: [assignedById], references: [id])
+  assignedToId String
+  assignedTo   User      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Priority {
+  id        String   @id @default(uuid())
+  content   String
+  date      String   // "YYYY-MM-DD"
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+model Reminder {
+  id        String   @id @default(uuid())
+  content   String
+  status    String   @default("active") // "active", "completed"
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String
+  type      String   @default("personal") // "personal", "shared"
+  date      String   // "YYYY-MM-DD" for daily notes, or empty for generic shared notes
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gratitude {
+  id        String   @id @default(uuid())
+  content   String
+  date      String   // "YYYY-MM-DD"
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+model DailyReport {
+  id          String   @id @default(uuid())
+  date        String   // "YYYY-MM-DD"
+  
+  workedOn    String?
+  completed   String?
+  learned     String?
+  difficult   String?
+  improve     String?
+  productivity Int     @default(5) // 1-10
+  mood        String?  // emoji string
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([date, userId])
+}
+
+model Roadmap {
+  id        String        @id @default(uuid())
+  title     String
+  type      String        // "Buddy", "Kiddo", "Shared"
+  items     RoadmapItem[]
+  createdAt DateTime      @default(now())
+}
+
+model RoadmapItem {
+  id          String    @id @default(uuid())
+  title       String
+  status      String    @default("pending") // "pending", "completed"
+  completedAt DateTime?
+  deadline    DateTime?
+  
+  roadmapId   String
+  roadmap     Roadmap   @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  actionType  String   // "TASK_CREATED", "TASK_COMPLETED", etc.
+  details     String
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+}
