@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, Lora } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
+import { UserSwitcher } from "@/components/UserSwitcher";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
         <div className="notebook-container">
+          <UserSwitcher />
           <SpiralBinding />
           {children}
           <Navigation />

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export async function toggleTask(taskId: string, status: string, userId: string) {
   const newStatus = status === "completed" ? "pending" : "completed";
@@ -99,3 +100,15 @@ export async function logActivity(actionType: string, details: string, userId: s
     data: { actionType, details, userId }
   });
 }
+
+export async function switchUser(partnerId: string) {
+  const cookieStore = await cookies();
+  cookieStore.set("notebook_user", partnerId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
+    path: "/",
+  });
+  revalidatePath("/", "layout");
+}
+
