@@ -8,16 +8,16 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
   const isCompleted = task.status === "completed";
 
   return (
-    <div className="checklist-item lined-paper">
+    <div className="checklist-item lined-paper" style={{ opacity: isPending ? 0.5 : 1 }}>
       <div 
-        className={`checklist-circle ${isCompleted ? 'completed' : ''} ${isPending ? 'opacity-50' : ''}`}
+        className={`checklist-circle ${isCompleted ? 'completed' : ''}`}
         onClick={() => startTransition(() => toggleTask(task.id, task.status, currentUserId))}
       />
-      <span className={`task-text ${isCompleted ? 'completed' : ''}`} style={{ fontFamily: 'var(--font-caveat)' }}>
+      <span className={`task-text font-handwriting ${isCompleted ? 'completed' : ''}`}>
         {task.title}
         {task.assignedToId !== task.assignedById && (
-          <span style={{ fontSize: '0.8rem', marginLeft: '8px', color: 'var(--text-secondary-brown)' }}>
-            (for {task.assignedTo.name})
+          <span style={{ fontSize: '1rem', marginLeft: '8px', color: 'var(--text-secondary-brown)', textDecoration: 'none' }}>
+            (for {task.assignedTo?.name || 'Friend'})
           </span>
         )}
       </span>
@@ -25,24 +25,26 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
   );
 }
 
-export function TaskForm({ currentUserId, partnerUserId, date }: { currentUserId: string, partnerUserId: string, date: string }) {
+export function TaskForm({ currentUserId, friendUserId, date, status = "pending" }: { currentUserId: string, friendUserId: string, date: string, status?: string }) {
   return (
     <form action={addTask} className="flex-row items-center lined-paper mt-4">
       <div className="checklist-circle" style={{ border: '2px dashed var(--border-soft-brown)' }}></div>
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="assignedById" value={currentUserId} />
+      <input type="hidden" name="status" value={status} />
       <input 
         type="text" 
         name="title" 
         placeholder="Add a new task..." 
-        style={{ fontFamily: 'var(--font-caveat)', fontSize: '1.25rem' }} 
+        className="font-handwriting"
+        style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '1.4rem' }} 
         required
       />
-      <select name="assignedToId" defaultValue={currentUserId} style={{ fontFamily: 'var(--font-caveat)', fontSize: '1rem', background: 'transparent', border: '1px dashed var(--border-soft-brown)', color: 'var(--text-dark-brown)' }}>
+      <select name="assignedToId" defaultValue={currentUserId} style={{ width: 'auto', background: 'transparent', border: '1px dashed var(--border-soft-brown)' }}>
         <option value={currentUserId}>For Me</option>
-        <option value={partnerUserId}>For Partner</option>
+        <option value={friendUserId}>For Friend</option>
       </select>
-      <button type="submit" className="btn-secondary" style={{ padding: '2px 8px', fontSize: '0.9rem' }}>Add</button>
+      <button type="submit" className="btn-secondary" style={{ padding: '2px 12px', fontSize: '1rem', fontFamily: 'var(--font-caveat)' }}>Add</button>
     </form>
   );
 }

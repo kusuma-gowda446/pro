@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Caveat, Lora } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/Navigation";
-import { UserSwitcher } from "@/components/UserSwitcher";
+import { Sidebar } from "@/components/Sidebar";
+import { DashboardSwitcher } from "@/components/DashboardSwitcher";
+import { getViewingUser, getFriendUser } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -18,11 +20,11 @@ const caveat = Caveat({
 
 export const metadata: Metadata = {
   title: "Buddy × Kiddo — Our Notebook",
-  description: "A private shared digital notebook for Buddy and Kiddo",
+  description: "A private shared digital workspace for Buddy and Kiddo",
 };
 
 function SpiralBinding() {
-  const holes = Array.from({ length: 24 });
+  const holes = Array.from({ length: 32 });
   return (
     <div className="spiral-binding">
       {holes.map((_, i) => (
@@ -35,19 +37,52 @@ function SpiralBinding() {
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("notebook_user")?.value;
+  
+  if (!userId) {
+    return (
+      <html lang="en">
+        <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
+          {children}
+        </body>
+      </html>
+    );
+  }
+
+  const { currentUser, viewingUser } = await getViewingUser();
+  const friendUser = await getFriendUser(currentUser.id);
+
   return (
     <html lang="en">
       <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
         <div className="notebook-container">
-          <UserSwitcher />
           <SpiralBinding />
-          {children}
-          <Navigation />
+          <div className="app-container">
+            <Sidebar />
+            <main className="main-content">
+              <div className="topbar">
+                <div style={{ fontFamily: 'var(--font-lora)', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                  {viewingUser.name}'s Notebook
+                </div>
+                {friendUser && (
+                  <DashboardSwitcher 
+                    currentUser={currentUser} 
+                    viewingUser={viewingUser} 
+                    friendUser={friendUser} 
+                  />
+                )}
+              </div>
+              <div style={{ flex: 1 }}>
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
       </body>
     </html>

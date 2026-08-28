@@ -26,6 +26,7 @@ export async function addTask(formData: FormData) {
   const date = formData.get("date") as string;
   const assignedById = formData.get("assignedById") as string;
   const assignedToId = formData.get("assignedToId") as string;
+  const status = (formData.get("status") as string) || "pending";
   
   if (!title) return;
   
@@ -34,7 +35,8 @@ export async function addTask(formData: FormData) {
       title,
       date,
       assignedById,
-      assignedToId
+      assignedToId,
+      status
     }
   });
   
@@ -110,5 +112,59 @@ export async function switchUser(partnerId: string) {
     path: "/",
   });
   revalidatePath("/", "layout");
+}
+
+export async function switchView(userId: string) {
+  const cookieStore = await cookies();
+  cookieStore.set("notebook_view", userId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
+    path: "/",
+  });
+  revalidatePath("/", "layout");
+}
+
+export async function logout() {
+  const cookieStore = await cookies();
+  cookieStore.delete("notebook_user");
+  cookieStore.delete("notebook_view");
+}
+
+export async function addRoadmapMilestone(roadmapId: string, title: string, userId: string) {
+  await prisma.roadmapItem.create({
+    data: { title, status: "pending", roadmapId }
+  });
+  
+  await prisma.activityLog.create({
+    data: { actionType: "MILESTONE_CREATED", details: `Added milestone: ${title}`, userId }
+  });
+  
+  revalidatePath("/");
+}
+
+export async function createRoadmap(userId: string, title: string) {
+  await prisma.roadmap.create({
+    data: { title, type: "Personal", userId }
+  });
+  
+  await prisma.activityLog.create({
+    data: { actionType: "ROADMAP_CREATED", details: `Created new roadmap: ${title}`, userId }
+  });
+  
+  revalidatePath("/");
+}
+
+export async function completeActivity(userId: string, activityDetails: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { currentActivity: null }
+  });
+  
+  await prisma.activityLog.create({
+    data: { actionType: "ACTIVITY_COMPLETED", details: `Completed: ${activityDetails}`, userId }
+  });
+  
+  revalidatePath("/");
 }
 

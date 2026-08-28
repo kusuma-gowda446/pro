@@ -13,6 +13,7 @@ model User {
   pin              String          @unique // "4421" or "4426"
   streak           Int             @default(0)
   roadmap_progress Int             @default(0)
+  currentActivity  String?
   createdAt        DateTime        @default(now())
   
   tasksAssignedBy  Task[]          @relation("AssignedBy")
@@ -22,6 +23,10 @@ model User {
   gratitudes       Gratitude[]
   dailyReports     DailyReport[]
   activityLogs     ActivityLog[]
+  roadmaps         Roadmap[]
+  learningTopics   LearningTopic[]
+  tests            Test[]
+  testAttempts     TestAttempt[]
 }
 
 model DailyPage {
@@ -68,16 +73,21 @@ model Reminder {
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  content   String
-  type      String   @default("personal") // "personal", "shared"
-  date      String   // "YYYY-MM-DD" for daily notes, or empty for generic shared notes
+  id          String   @id @default(uuid())
+  title       String?
+  content     String
+  type        String   @default("personal") // "personal", "shared"
+  date        String   // "YYYY-MM-DD" for daily notes, or empty for generic shared notes
+  pinned      Boolean  @default(false)
+  favorite    Boolean  @default(false)
+  archived    Boolean  @default(false)
   
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  attachments NoteAttachment[]
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Gratitude {
@@ -113,11 +123,21 @@ model DailyReport {
 }
 
 model Roadmap {
-  id        String        @id @default(uuid())
-  title     String
-  type      String        // "Buddy", "Kiddo", "Shared"
-  items     RoadmapItem[]
-  createdAt DateTime      @default(now())
+  id            String        @id @default(uuid())
+  title         String
+  type          String        // "Buddy", "Kiddo", "Shared"
+  description   String?
+  status        String        @default("In Progress")
+  progress      Int           @default(0)
+  startDate     DateTime?
+  targetDate    DateTime?
+  completedDate DateTime?
+  
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  
+  items         RoadmapItem[]
+  createdAt     DateTime      @default(now())
 }
 
 model RoadmapItem {
@@ -137,9 +157,89 @@ model ActivityLog {
   id          String   @id @default(uuid())
   actionType  String   // "TASK_CREATED", "TASK_COMPLETED", etc.
   details     String
+  metadata    String?  // JSON string for additional context
   
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   
   createdAt   DateTime @default(now())
+}
+
+model NoteAttachment {
+  id        String   @id @default(uuid())
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileType  String
+  fileSize  Int
+  fileUrl   String
+  createdAt DateTime @default(now())
+}
+
+model LearningTopic {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  topic         String
+  category      String?
+  difficulty    String?
+  progress      Int      @default(0)
+  status        String   @default("Planned") // "Planned", "Learning", "Completed"
+  notes         String?
+  startedAt     DateTime?
+  lastStudiedAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  tests         Test[]
+}
+
+model Test {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  topicId     String
+  topic       LearningTopic @relation(fields: [topicId], references: [id])
+  title       String
+  createdAt   DateTime @default(now())
+  
+  questions   TestQuestion[]
+  attempts    TestAttempt[]
+}
+
+model TestQuestion {
+  id            String   @id @default(uuid())
+  testId        String
+  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  question      String
+  options       String   // JSON string of options
+  correctAnswer String   // JSON string or string of correct answer
+  explanation   String?
+  
+  answers       TestAnswer[]
+}
+
+model TestAttempt {
+  id             String   @id @default(uuid())
+  testId         String
+  test           Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  score          Int      @default(0)
+  totalQuestions Int
+  percentage     Int      @default(0)
+  timeTaken      Int?     // in seconds
+  attemptedAt    DateTime @default(now())
+  
+  answers        TestAnswer[]
+}
+
+model TestAnswer {
+  id             String   @id @default(uuid())
+  attemptId      String
+  attempt        TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       TestQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswer String
+  isCorrect      Boolean
 }
