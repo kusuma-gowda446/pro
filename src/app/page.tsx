@@ -49,30 +49,6 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
         
         {/* Left Column */}
         <div className="responsive-col">
-          
-          <section style={{ marginBottom: '50px' }}>
-            <h3>CURRENTLY DOING</h3>
-            <div style={{ marginTop: '10px' }}>
-              {currentlyDoingTasks.map(task => (
-                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
-              ))}
-              <TaskForm 
-                currentUserId={currentUser.id} 
-                friendUserId={friendUser?.id || currentUser.id} 
-                currentUserName={currentUser.name}
-                friendUserName={viewingUser.name}
-                date={todayStr} 
-                status="in-progress" 
-                defaultAssigneeId={viewingUser.id}
-                hideAssigneeDropdown={true}
-              />
-
-              {currentlyDoingTasks.length === 0 && (
-                <p className="font-handwriting text-muted lined-paper">Not actively working on anything right now.</p>
-              )}
-            </div>
-          </section>
-
           <section style={{ marginBottom: '50px' }}>
             <h3>TODAY'S TASKS</h3>
             <div style={{ marginTop: '10px' }}>
