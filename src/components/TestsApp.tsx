@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { format } from "date-fns";
+import { DeleteButton } from "./DeleteButton";
+import { deleteTest } from "@/app/actions/tests";
 
 export function TestsApp({ initialTests, topics, userId, isOwner, currentUserId }: any) {
   
@@ -18,11 +20,20 @@ export function TestsApp({ initialTests, topics, userId, isOwner, currentUserId 
           const lastAttempt = t.attempts?.[0];
           return (
             <div key={t.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{t.title}</h3>
-                <div className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
-                  {t.topic?.topic || 'General'} • {t.questions.length} Questions
+              <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{t.title}</h3>
+                  <div className="text-muted" style={{ fontSize: '0.9rem', marginTop: '4px' }}>
+                    {t.topic?.topic || 'General'} • {t.questions.length} Questions
+                  </div>
                 </div>
+                {isOwner && (
+                  <DeleteButton 
+                    onDelete={deleteTest.bind(null, t.id, currentUserId)} 
+                    confirmMessage={`Are you sure you want to delete the test '${t.title}'? This cannot be undone.`}
+                    title="Delete Test"
+                  />
+                )}
               </div>
               
               <div style={{ padding: '16px', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', marginBottom: '20px' }}>

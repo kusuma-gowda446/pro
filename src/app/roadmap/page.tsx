@@ -1,8 +1,9 @@
 import { getViewingUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { addRoadmapMilestone, createRoadmap } from "@/app/actions";
+import { addRoadmapMilestone, createRoadmap, deleteRoadmap, deleteRoadmapMilestone } from "@/app/actions";
 import { revalidatePath } from "next/cache";
 import { RoadmapAccordionItem } from "@/components/RoadmapAccordionItem";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export default async function RoadmapPage() {
   const { viewingUser, currentUser, isOwner } = await getViewingUser();
@@ -55,7 +56,12 @@ export default async function RoadmapPage() {
           const progressStr = totalItems > 0 ? `${completedItems}/${totalItems} completed` : "No milestones yet";
 
           return (
-            <RoadmapAccordionItem key={roadmap.id} roadmap={{ title: roadmap.title }} progressStr={progressStr}>
+            <RoadmapAccordionItem 
+              key={roadmap.id} 
+              roadmap={{ title: roadmap.title }} 
+              progressStr={progressStr}
+              onDelete={isOwner ? deleteRoadmap.bind(null, roadmap.id, viewingUser.id) : undefined}
+            >
               <div className="flex-col" style={{ gap: '10px' }}>
                 {roadmap.items.map((item: any) => (
                   <div key={item.id} className="checklist-item lined-paper" style={{ opacity: item.status === "completed" ? 0.6 : 1 }}>
@@ -74,9 +80,18 @@ export default async function RoadmapPage() {
                     ) : (
                       <div className="checklist-circle" style={{ backgroundColor: 'var(--text-dark-brown)', border: 'none' }}></div>
                     )}
-                    <span className="task-text font-handwriting" style={{ textDecoration: item.status === "completed" ? 'line-through' : 'none' }}>
-                      {item.title}
-                    </span>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="task-text font-handwriting" style={{ textDecoration: item.status === "completed" ? 'line-through' : 'none' }}>
+                        {item.title}
+                      </span>
+                      {isOwner && (
+                        <DeleteButton 
+                          onDelete={deleteRoadmapMilestone.bind(null, item.id, viewingUser.id)}
+                          title="Delete Milestone"
+                          confirmMessage={`Are you sure you want to delete the milestone '${item.title}'?`}
+                        />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

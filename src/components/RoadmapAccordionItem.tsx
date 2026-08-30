@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { DeleteButton } from "./DeleteButton";
 
 export function RoadmapAccordionItem({ 
   roadmap, 
   progressStr, 
-  children 
+  children,
+  onDelete
 }: { 
   roadmap: { title: string }, 
   progressStr: string, 
-  children: React.ReactNode 
+  children: React.ReactNode,
+  onDelete?: () => Promise<void>
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,7 +35,17 @@ export function RoadmapAccordionItem({
           {isOpen ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
           {roadmap.title.toUpperCase()}
         </h3>
-        <span className="font-handwriting" style={{ color: 'var(--text-secondary-brown)', fontSize: '1.1rem' }}>{progressStr}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span className="font-handwriting" style={{ color: 'var(--text-secondary-brown)', fontSize: '1.1rem' }}>{progressStr}</span>
+          {onDelete && (
+            <DeleteButton 
+              onDelete={onDelete} 
+              confirmMessage={`Are you sure you want to delete the roadmap '${roadmap.title}'? This will delete all milestones inside it.`} 
+              title="Delete Roadmap" 
+              size={18}
+            />
+          )}
+        </div>
       </div>
       
       {isOpen && (

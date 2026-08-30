@@ -61,7 +61,6 @@ export default async function TasksPage() {
                   defaultAssigneeId={currentUser.id}
                 />
               </div>
-
               {myPendingTasks.map(task => (
                 <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
               ))}

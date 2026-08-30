@@ -126,9 +126,22 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
                 <h4 style={{ margin: 0, fontSize: '1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {note.title || 'Untitled Note'}
                 </h4>
-                <div style={{ display: 'flex', gap: '4px' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   {note.pinned && <Pin size={12} color="var(--accent-color)" />}
                   {note.favorite && <Star size={12} color="#FFD700" fill="#FFD700" />}
+                  {isOwner && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Are you sure you want to delete this note?')) {
+                          handleDelete(note.id);
+                        }
+                      }}
+                      title="Delete Note"
+                    >
+                      <Trash2 size={14} color="var(--text-tertiary)" />
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="text-muted" style={{ fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '8px' }}>
@@ -164,8 +177,12 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
                   <button onClick={() => handleUpdate(selectedNote.id, { archived: !selectedNote.archived })} title="Archive">
                     <Archive size={18} color={selectedNote.archived ? "var(--accent-color)" : "var(--text-tertiary)"} />
                   </button>
-                  <button onClick={() => handleDelete(selectedNote.id)} title="Delete">
-                    <Trash2 size={18} color="var(--text-tertiary)" />
+                  <button onClick={() => {
+                    if (confirm('Are you sure you want to delete this note?')) {
+                      handleDelete(selectedNote.id);
+                    }
+                  }} title="Delete" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>
+                    <Trash2 size={18} /> Delete
                   </button>
                 </div>
               )}

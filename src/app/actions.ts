@@ -44,6 +44,15 @@ export async function addTask(formData: FormData) {
   revalidatePath("/", "layout");
 }
 
+export async function deleteTask(taskId: string, userId: string) {
+  const task = await prisma.task.findUnique({ where: { id: taskId } });
+  if (!task) return;
+  
+  await prisma.task.delete({ where: { id: taskId } });
+  await logActivity("TASK_DELETED", `Deleted task: ${task.title}`, userId);
+  revalidatePath("/", "layout");
+}
+
 export async function updateDailyReport(formData: FormData) {
   const userId = formData.get("userId") as string;
   const date = formData.get("date") as string;
@@ -184,6 +193,24 @@ export async function createRoadmap(userId: string, title: string) {
   });
   
   revalidatePath("/");
+}
+
+export async function deleteRoadmap(roadmapId: string, userId: string) {
+  const roadmap = await prisma.roadmap.findUnique({ where: { id: roadmapId } });
+  if (!roadmap) return;
+  
+  await prisma.roadmap.delete({ where: { id: roadmapId } });
+  await logActivity("ROADMAP_DELETED", `Deleted roadmap: ${roadmap.title}`, userId);
+  revalidatePath("/", "layout");
+}
+
+export async function deleteRoadmapMilestone(milestoneId: string, userId: string) {
+  const milestone = await prisma.roadmapItem.findUnique({ where: { id: milestoneId } });
+  if (!milestone) return;
+  
+  await prisma.roadmapItem.delete({ where: { id: milestoneId } });
+  await logActivity("MILESTONE_DELETED", `Deleted milestone: ${milestone.title}`, userId);
+  revalidatePath("/", "layout");
 }
 
 export async function completeActivity(userId: string, activityDetails: string) {

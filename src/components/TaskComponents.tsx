@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { toggleTask, addTask } from "@/app/actions";
+import { toggleTask, addTask, deleteTask } from "@/app/actions";
+import { Trash2 } from "lucide-react";
 
 export function TaskItem({ task, currentUserId }: { task: any, currentUserId: string }) {
   const [isPending, startTransition] = useTransition();
@@ -13,19 +14,48 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
         className={`checklist-circle ${isCompleted ? 'completed' : ''}`}
         onClick={() => startTransition(() => toggleTask(task.id, task.status, currentUserId))}
       />
-      <span className={`task-text font-handwriting ${isCompleted ? 'completed' : ''}`}>
-        {task.title}
-        {task.assignedToId !== task.assignedById && (
-          <span style={{ fontSize: '1rem', marginLeft: '8px', color: 'var(--text-secondary-brown)', textDecoration: 'none' }}>
-            (for {task.assignedTo?.name || 'Friend'})
-          </span>
-        )}
+      <span className={`task-text font-handwriting ${isCompleted ? 'completed' : ''}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>
+          {task.title}
+          {task.assignedToId !== task.assignedById && (
+            <span style={{ fontSize: '1rem', marginLeft: '8px', color: 'var(--text-secondary-brown)', textDecoration: 'none' }}>
+              (given by {task.assignedBy?.name || 'Partner'})
+            </span>
+          )}
+        </span>
+        
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm('Are you sure you want to delete this task?')) {
+              startTransition(() => deleteTask(task.id, currentUserId));
+            }
+          }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+          title="Delete Task"
+        >
+          <Trash2 size={16} color="var(--text-tertiary)" />
+        </button>
       </span>
     </div>
   );
 }
 
-export function TaskForm({ currentUserId, friendUserId, date, status = "pending", defaultAssigneeId }: { currentUserId: string, friendUserId: string, date: string, status?: string, defaultAssigneeId?: string }) {
+export function TaskForm({ 
+  currentUserId, 
+  friendUserId, 
+  date, 
+  status = "pending", 
+  defaultAssigneeId,
+  hideAssigneeDropdown = false
+}: { 
+  currentUserId: string, 
+  friendUserId: string, 
+  date: string, 
+  status?: string, 
+  defaultAssigneeId?: string,
+  hideAssigneeDropdown?: boolean
+}) {
   return (
     <form action={addTask} className="flex-row items-center lined-paper mt-4">
       <div className="checklist-circle" style={{ border: '2px dashed var(--border-soft-brown)' }}></div>
@@ -40,10 +70,19 @@ export function TaskForm({ currentUserId, friendUserId, date, status = "pending"
         style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '1.4rem' }} 
         required
       />
-      <select name="assignedToId" defaultValue={defaultAssigneeId || currentUserId} style={{ width: 'auto', background: 'transparent', border: '1px dashed var(--border-soft-brown)' }}>
-        <option value={currentUserId}>For Me</option>
-        <option value={friendUserId}>For Friend</option>
-      </select>
+      {hideAssigneeDropdown ? (
+        <input type="hidden" name="assignedToId" value={defaultAssigneeId || currentUserId} />
+      ) : (
+        <select 
+          name="assignedToId" 
+          defaultValue={defaultAssigneeId || currentUserId}
+          className="font-handwriting"
+          style={{ border: 'none', background: 'transparent', fontSize: '1rem', color: 'var(--text-secondary-brown)', marginRight: '10px' }}
+        >
+          <option value={currentUserId}>For Me</option>
+          <option value={friendUserId}>For Partner</option>
+        </select>
+      )}
       <button type="submit" className="btn-secondary" style={{ padding: '2px 12px', fontSize: '1rem', fontFamily: 'var(--font-caveat)' }}>Add</button>
     </form>
   );

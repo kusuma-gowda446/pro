@@ -52,3 +52,12 @@ export async function submitTestAttempt(testId: string, userId: string, score: n
   revalidatePath("/results");
   return attempt;
 }
+
+export async function deleteTest(testId: string, userId: string) {
+  const test = await prisma.test.findUnique({ where: { id: testId } });
+  if (!test) return;
+  
+  await prisma.test.delete({ where: { id: testId } });
+  revalidatePath("/tests");
+  revalidatePath("/results");
+}

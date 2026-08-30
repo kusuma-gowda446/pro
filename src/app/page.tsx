@@ -62,7 +62,9 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
                 date={todayStr} 
                 status="in-progress" 
                 defaultAssigneeId={viewingUser.id}
+                hideAssigneeDropdown={true}
               />
+
               {currentlyDoingTasks.length === 0 && (
                 <p className="font-handwriting text-muted lined-paper">Not actively working on anything right now.</p>
               )}
@@ -81,7 +83,9 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
                 date={todayStr} 
                 status="pending"
                 defaultAssigneeId={viewingUser.id}
+                hideAssigneeDropdown={true}
               />
+
               {todayTasks.length === 0 && (
                 <p className="font-handwriting text-muted lined-paper">No tasks for today.</p>
               )}
