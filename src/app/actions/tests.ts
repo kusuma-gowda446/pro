@@ -58,6 +58,15 @@ export async function deleteTest(testId: string, userId: string) {
   if (!test) return;
   
   await prisma.test.delete({ where: { id: testId } });
+  
+  await prisma.trashItem.create({
+    data: {
+      itemType: "Test",
+      itemTitle: test.title,
+      userId
+    }
+  });
+  
   revalidatePath("/tests");
   revalidatePath("/results");
 }

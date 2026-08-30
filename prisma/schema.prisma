@@ -27,6 +27,7 @@ model User {
   learningTopics   LearningTopic[]
   tests            Test[]
   testAttempts     TestAttempt[]
+  trashItems       TrashItem[]
 }
 
 model DailyPage {
@@ -163,6 +164,17 @@ model ActivityLog {
   user        User     @relation(fields: [userId], references: [id])
   
   createdAt   DateTime @default(now())
+}
+
+model TrashItem {
+  id          String   @id @default(uuid())
+  itemType    String   // "Task", "Roadmap", "Milestone", "Note", "Test"
+  itemTitle   String
+  itemData    String?  // JSON string
+  deletedAt   DateTime @default(now())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model NoteAttachment {

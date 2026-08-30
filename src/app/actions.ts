@@ -49,6 +49,15 @@ export async function deleteTask(taskId: string, userId: string) {
   if (!task) return;
   
   await prisma.task.delete({ where: { id: taskId } });
+  
+  await prisma.trashItem.create({
+    data: {
+      itemType: "Task",
+      itemTitle: task.title,
+      userId
+    }
+  });
+  
   await logActivity("TASK_DELETED", `Deleted task: ${task.title}`, userId);
   revalidatePath("/", "layout");
 }
@@ -200,6 +209,15 @@ export async function deleteRoadmap(roadmapId: string, userId: string) {
   if (!roadmap) return;
   
   await prisma.roadmap.delete({ where: { id: roadmapId } });
+  
+  await prisma.trashItem.create({
+    data: {
+      itemType: "Roadmap",
+      itemTitle: roadmap.title,
+      userId
+    }
+  });
+  
   await logActivity("ROADMAP_DELETED", `Deleted roadmap: ${roadmap.title}`, userId);
   revalidatePath("/", "layout");
 }
@@ -209,6 +227,15 @@ export async function deleteRoadmapMilestone(milestoneId: string, userId: string
   if (!milestone) return;
   
   await prisma.roadmapItem.delete({ where: { id: milestoneId } });
+  
+  await prisma.trashItem.create({
+    data: {
+      itemType: "Milestone",
+      itemTitle: milestone.title,
+      userId
+    }
+  });
+  
   await logActivity("MILESTONE_DELETED", `Deleted milestone: ${milestone.title}`, userId);
   revalidatePath("/", "layout");
 }

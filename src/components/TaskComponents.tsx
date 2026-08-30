@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { toggleTask, addTask, deleteTask } from "@/app/actions";
 import { Trash2 } from "lucide-react";
 
-export function TaskItem({ task, currentUserId }: { task: any, currentUserId: string }) {
+export function TaskItem({ task, currentUserId, isOwner = true }: { task: any, currentUserId: string, isOwner?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const isCompleted = task.status === "completed";
 
@@ -12,18 +12,21 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
     <div className="checklist-item lined-paper" style={{ opacity: isPending ? 0.5 : 1 }}>
       <div 
         className={`checklist-circle ${isCompleted ? 'completed' : ''}`}
-        onClick={() => startTransition(() => toggleTask(task.id, task.status, currentUserId))}
+        onClick={() => {
+          if (!isOwner) return;
+          startTransition(() => toggleTask(task.id, task.status, currentUserId));
+        }}
+        style={{ cursor: isOwner ? 'pointer' : 'default' }}
       />
       <span className={`task-text font-handwriting ${isCompleted ? 'completed' : ''}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>
           {task.title}
           {task.assignedToId !== task.assignedById && (
             <span style={{ fontSize: '1rem', marginLeft: '8px', color: 'var(--text-secondary-brown)', textDecoration: 'none' }}>
-              (given by {task.assignedBy?.name || 'Partner'})
+              (given by {task.assignedBy?.name})
             </span>
           )}
         </span>
-        
         <button 
           onClick={(e) => {
             e.stopPropagation();
@@ -44,6 +47,8 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
 export function TaskForm({ 
   currentUserId, 
   friendUserId, 
+  currentUserName = "Me",
+  friendUserName = "Partner",
   date, 
   status = "pending", 
   defaultAssigneeId,
@@ -51,6 +56,8 @@ export function TaskForm({
 }: { 
   currentUserId: string, 
   friendUserId: string, 
+  currentUserName?: string,
+  friendUserName?: string,
   date: string, 
   status?: string, 
   defaultAssigneeId?: string,
@@ -79,8 +86,8 @@ export function TaskForm({
           className="font-handwriting"
           style={{ border: 'none', background: 'transparent', fontSize: '1rem', color: 'var(--text-secondary-brown)', marginRight: '10px' }}
         >
-          <option value={currentUserId}>For Me</option>
-          <option value={friendUserId}>For Partner</option>
+          <option value={currentUserId}>For {currentUserName}</option>
+          <option value={friendUserId}>For {friendUserName}</option>
         </select>
       )}
       <button type="submit" className="btn-secondary" style={{ padding: '2px 12px', fontSize: '1rem', fontFamily: 'var(--font-caveat)' }}>Add</button>

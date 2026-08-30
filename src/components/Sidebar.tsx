@@ -11,7 +11,8 @@ import {
   FlaskConical, 
   BarChart2, 
   Clock,
-  LogOut
+  LogOut,
+  Trash2
 } from "lucide-react";
 import { logout } from "@/app/actions";
 
@@ -27,6 +28,7 @@ export function Sidebar() {
     { href: "/roadmap", label: "Roadmap", icon: <Map size={18} /> },
     { href: "/tests", label: "Tests", icon: <FlaskConical size={18} /> },
     { href: "/results", label: "Results", icon: <BarChart2 size={18} /> },
+    { href: "/trash", label: "Trash", icon: <Trash2 size={18} /> },
   ];
   
   return (

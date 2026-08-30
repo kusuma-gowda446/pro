@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { redirect } from "next/navigation";
 
 export default async function TasksPage() {
-  const { viewingUser, currentUser } = await getViewingUser();
+  const { viewingUser, currentUser, isOwner } = await getViewingUser();
   const friendUser = await getFriendUser(viewingUser.id);
   
   const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -42,13 +42,13 @@ export default async function TasksPage() {
         </div>
       </div>
 
-      <div className="responsive-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }} className="tasks-grid">
         
         {/* Left Column: My Tasks */}
         <div className="responsive-col">
           <section style={{ marginBottom: '50px' }}>
             <h3 style={{ marginBottom: '20px', borderBottom: '1px solid var(--border-soft-brown)', paddingBottom: '10px' }}>
-              TASKS FOR ME
+              TASKS FOR {currentUser.name.toUpperCase()}
             </h3>
             
             <div style={{ marginTop: '10px' }}>
@@ -56,13 +56,16 @@ export default async function TasksPage() {
                 <TaskForm 
                   currentUserId={currentUser.id} 
                   friendUserId={friendUser?.id || currentUser.id} 
+                  currentUserName={currentUser.name}
+                  friendUserName={friendUser?.name}
                   date={todayStr} 
                   status="pending" 
                   defaultAssigneeId={currentUser.id}
+                  hideAssigneeDropdown={true}
                 />
               </div>
               {myPendingTasks.map(task => (
-                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
               ))}
               
               {myPendingTasks.length === 0 && (
@@ -73,7 +76,7 @@ export default async function TasksPage() {
                 <div style={{ marginTop: '30px' }}>
                   <h4 style={{ fontFamily: 'var(--font-lora)', fontSize: '1rem', color: 'var(--text-secondary-brown)', marginBottom: '10px' }}>Completed</h4>
                   {myCompletedTasks.map(task => (
-                    <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                    <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
                   ))}
                 </div>
               )}
@@ -91,17 +94,22 @@ export default async function TasksPage() {
               
               <div style={{ marginTop: '10px' }}>
                 <div style={{ marginBottom: '20px' }}>
-                  <TaskForm 
-                    currentUserId={currentUser.id} 
-                    friendUserId={friendUser.id} 
-                    date={todayStr} 
-                    status="pending" 
-                    defaultAssigneeId={friendUser.id}
-                  />
+                  {isOwner && (
+                    <TaskForm 
+                      currentUserId={currentUser.id} 
+                      friendUserId={friendUser.id} 
+                      currentUserName={currentUser.name}
+                      friendUserName={friendUser.name}
+                      date={todayStr} 
+                      status="pending" 
+                      defaultAssigneeId={friendUser.id}
+                      hideAssigneeDropdown={true}
+                    />
+                  )}
                 </div>
 
                 {friendPendingTasks.map(task => (
-                  <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                  <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
                 ))}
                 
                 {friendPendingTasks.length === 0 && (
@@ -112,7 +120,7 @@ export default async function TasksPage() {
                   <div style={{ marginTop: '30px' }}>
                     <h4 style={{ fontFamily: 'var(--font-lora)', fontSize: '1rem', color: 'var(--text-secondary-brown)', marginBottom: '10px' }}>Completed</h4>
                     {friendCompletedTasks.map(task => (
-                      <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                      <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
                     ))}
                   </div>
                 )}

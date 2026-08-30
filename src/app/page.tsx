@@ -9,7 +9,7 @@ import { RoadmapSelector } from "@/components/RoadmapSelector";
 
 export default async function DashboardPage(props: { searchParams: Promise<{ roadmapId?: string }> }) {
   const searchParams = await props.searchParams;
-  const { viewingUser, currentUser } = await getViewingUser();
+  const { viewingUser, currentUser, isOwner } = await getViewingUser();
   const friendUser = await getFriendUser(currentUser.id);
   
   const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -54,11 +54,13 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
             <h3>CURRENTLY DOING</h3>
             <div style={{ marginTop: '10px' }}>
               {currentlyDoingTasks.map(task => (
-                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
               ))}
               <TaskForm 
                 currentUserId={currentUser.id} 
                 friendUserId={friendUser?.id || currentUser.id} 
+                currentUserName={currentUser.name}
+                friendUserName={viewingUser.name}
                 date={todayStr} 
                 status="in-progress" 
                 defaultAssigneeId={viewingUser.id}
@@ -75,13 +77,15 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
             <h3>TODAY'S TASKS</h3>
             <div style={{ marginTop: '10px' }}>
               {todayTasks.map(task => (
-                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} />
+                <TaskItem key={task.id} task={task} currentUserId={currentUser.id} isOwner={isOwner} />
               ))}
               <TaskForm 
                 currentUserId={currentUser.id} 
                 friendUserId={friendUser?.id || currentUser.id} 
+                currentUserName={currentUser.name}
+                friendUserName={viewingUser.name}
                 date={todayStr} 
-                status="pending"
+                status="pending" 
                 defaultAssigneeId={viewingUser.id}
                 hideAssigneeDropdown={true}
               />
@@ -107,18 +111,26 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
               {selectedRoadmap && (
                 <div key={selectedRoadmap.id}>
                   {selectedRoadmap.items.map((item: any) => (
-                    <div key={item.id} className="checklist-item lined-paper">
-                      <form action={async () => {
-                        "use server";
-                        await prisma.roadmapItem.update({ where: { id: item.id }, data: { status: "completed" } });
-                        await prisma.activityLog.create({
-                          data: { actionType: "MILESTONE_COMPLETED", details: `Completed roadmap milestone: ${item.title}`, userId: viewingUser.id }
-                        });
-                        revalidatePath("/");
-                      }}>
-                        <button type="submit" className="checklist-circle"></button>
-                      </form>
-                      <span className="task-text font-handwriting">{item.title}</span>
+                    <div key={item.id} className="checklist-item lined-paper" style={{ opacity: item.status === "completed" ? 0.6 : 1 }}>
+                      {item.status === "pending" ? (
+                        isOwner ? (
+                          <form action={async () => {
+                            "use server";
+                            await prisma.roadmapItem.update({ where: { id: item.id }, data: { status: "completed" } });
+                            await prisma.activityLog.create({
+                              data: { actionType: "MILESTONE_COMPLETED", details: `Completed roadmap milestone: ${item.title}`, userId: viewingUser.id }
+                            });
+                            revalidatePath("/");
+                          }}>
+                            <button type="submit" className="checklist-circle"></button>
+                          </form>
+                        ) : (
+                          <div className="checklist-circle"></div>
+                        )
+                      ) : (
+                        <div className="checklist-circle" style={{ backgroundColor: 'var(--text-dark-brown)', border: 'none' }}></div>
+                      )}
+                      <span className="task-text font-handwriting" style={{ textDecoration: item.status === "completed" ? 'line-through' : 'none' }}>{item.title}</span>
                     </div>
                   ))}
                 </div>

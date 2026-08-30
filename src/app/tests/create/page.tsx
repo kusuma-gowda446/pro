@@ -4,8 +4,14 @@ import { TestCreator } from "@/components/TestCreator";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { redirect } from "next/navigation";
+
 export default async function CreateTestPage() {
-  const { viewingUser, currentUser } = await getViewingUser();
+  const { viewingUser, currentUser, isOwner } = await getViewingUser();
+  
+  if (!isOwner) {
+    redirect("/tests");
+  }
   
   const topics = await prisma.learningTopic.findMany({
     where: { userId: viewingUser.id },

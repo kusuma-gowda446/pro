@@ -9,11 +9,13 @@ export function TestsApp({ initialTests, topics, userId, isOwner, currentUserId 
   
   return (
     <div className="flex-col" style={{ gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <Link href="/tests/create" className="btn-primary" style={{ textDecoration: 'none' }}>
-          Create New Test
-        </Link>
-      </div>
+      {isOwner && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Link href="/tests/create" className="btn-primary" style={{ textDecoration: 'none' }}>
+            Create New Test
+          </Link>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
         {initialTests.map((t: any) => {

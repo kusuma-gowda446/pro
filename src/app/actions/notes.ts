@@ -42,6 +42,14 @@ export async function deleteNote(id: string, currentUserId: string) {
   
   await prisma.note.delete({ where: { id } });
   
+  await prisma.trashItem.create({
+    data: {
+      itemType: "Note",
+      itemTitle: note.title || "Untitled Note",
+      userId: currentUserId
+    }
+  });
+  
   revalidatePath("/notes");
 }
 

@@ -66,17 +66,21 @@ export default async function RoadmapPage() {
                 {roadmap.items.map((item: any) => (
                   <div key={item.id} className="checklist-item lined-paper" style={{ opacity: item.status === "completed" ? 0.6 : 1 }}>
                     {item.status === "pending" ? (
-                      <form action={async () => {
-                        "use server";
-                        await prisma.roadmapItem.update({ where: { id: item.id }, data: { status: "completed" } });
-                        await prisma.activityLog.create({
-                          data: { actionType: "MILESTONE_COMPLETED", details: `Completed roadmap milestone: ${item.title}`, userId: viewingUser.id }
-                        });
-                        revalidatePath("/roadmap");
-                        revalidatePath("/");
-                      }}>
-                        <button type="submit" className="checklist-circle"></button>
-                      </form>
+                      isOwner ? (
+                        <form action={async () => {
+                          "use server";
+                          await prisma.roadmapItem.update({ where: { id: item.id }, data: { status: "completed" } });
+                          await prisma.activityLog.create({
+                            data: { actionType: "MILESTONE_COMPLETED", details: `Completed roadmap milestone: ${item.title}`, userId: viewingUser.id }
+                          });
+                          revalidatePath("/roadmap");
+                          revalidatePath("/");
+                        }}>
+                          <button type="submit" className="checklist-circle"></button>
+                        </form>
+                      ) : (
+                        <div className="checklist-circle"></div>
+                      )
                     ) : (
                       <div className="checklist-circle" style={{ backgroundColor: 'var(--text-dark-brown)', border: 'none' }}></div>
                     )}
