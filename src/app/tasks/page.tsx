@@ -55,7 +55,7 @@ export default async function TasksPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }} className="tasks-grid">
+      <div className="tasks-grid">
         
         {/* Left Column: My Tasks */}
         <div className="responsive-col">

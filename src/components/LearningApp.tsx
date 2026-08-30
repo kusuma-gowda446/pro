@@ -63,7 +63,7 @@ export function LearningApp({ topics, userId, isOwner, currentUserId }: any) {
         </form>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
         {topics.map((t: any) => (
           <div key={t.id} className="card" style={{ opacity: isPending ? 0.7 : 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>

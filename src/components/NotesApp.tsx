@@ -82,9 +82,9 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
   };
 
   return (
-    <div className="card" style={{ display: 'flex', flex: 1, padding: 0, overflow: 'hidden' }}>
-      {/* Sidebar */}
-      <div style={{ width: '300px', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+    <div className="notes-app-container">
+        {/* Sidebar */}
+        <div className="notes-app-sidebar">
         <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ position: 'relative' }}>
             <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-secondary-brown)' }} />
@@ -159,7 +159,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
       </div>
       
       {/* Editor Main */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-card)' }}>
+      <div className="notes-app-main">
         {selectedNote ? (
           <>
             <div style={{ padding: '16px 32px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

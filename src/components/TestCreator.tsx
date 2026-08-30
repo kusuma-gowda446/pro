@@ -90,7 +90,7 @@ export function TestCreator({ topics, userId, currentUserId }: any) {
               <input value={q.question} onChange={e => handleQuestionChange(qIndex, 'question', e.target.value)} required placeholder="Enter question..." style={{ fontSize: '1.1rem', padding: '12px' }} />
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            <div className="options-grid">
               {q.options.map((opt, oIndex) => (
                 <div key={oIndex} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'var(--bg-app)', borderRadius: 'var(--radius-sm)', border: q.correctAnswer === oIndex ? '1px solid var(--accent-color)' : '1px solid transparent' }}>
                   <input type="radio" name={`correct-${qIndex}`} checked={q.correctAnswer === oIndex} onChange={() => handleQuestionChange(qIndex, 'correctAnswer', oIndex)} style={{ width: 'auto' }} />
