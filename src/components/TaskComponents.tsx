@@ -37,7 +37,7 @@ export function TaskItem({ task, currentUserId, isOwner = true }: { task: any, c
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
           title="Delete Task"
         >
-          <Trash2 size={16} color="var(--text-tertiary)" />
+          <Trash2 size={16} color="var(--text-secondary-brown)" />
         </button>
       </span>
     </div>
@@ -52,7 +52,8 @@ export function TaskForm({
   date, 
   status = "pending", 
   defaultAssigneeId,
-  hideAssigneeDropdown = false
+  hideAssigneeDropdown = false,
+  category = ""
 }: { 
   currentUserId: string, 
   friendUserId: string, 
@@ -61,7 +62,8 @@ export function TaskForm({
   date: string, 
   status?: string, 
   defaultAssigneeId?: string,
-  hideAssigneeDropdown?: boolean
+  hideAssigneeDropdown?: boolean,
+  category?: string
 }) {
   return (
     <form action={addTask} className="flex-row items-center lined-paper mt-4">
@@ -69,6 +71,7 @@ export function TaskForm({
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="assignedById" value={currentUserId} />
       <input type="hidden" name="status" value={status} />
+      <input type="hidden" name="category" value={category} />
       <input 
         type="text" 
         name="title" 

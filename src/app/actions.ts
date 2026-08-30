@@ -27,6 +27,7 @@ export async function addTask(formData: FormData) {
   const assignedById = formData.get("assignedById") as string;
   const assignedToId = formData.get("assignedToId") as string;
   const status = (formData.get("status") as string) || "pending";
+  const category = (formData.get("category") as string) || null;
   
   if (!title) return;
   
@@ -36,7 +37,8 @@ export async function addTask(formData: FormData) {
       date,
       assignedById,
       assignedToId,
-      status
+      status,
+      category
     }
   });
   

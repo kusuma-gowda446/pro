@@ -11,7 +11,13 @@ export default async function TasksPage() {
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   const myTasks = await prisma.task.findMany({
-    where: { assignedToId: viewingUser.id },
+    where: { 
+      assignedToId: viewingUser.id,
+      OR: [
+        { category: null },
+        { category: { not: "dashboard" } }
+      ]
+    },
     include: { assignedTo: true, assignedBy: true },
     orderBy: { createdAt: 'desc' }
   });
@@ -22,7 +28,14 @@ export default async function TasksPage() {
   let friendTasks: any[] = [];
   if (friendUser) {
     friendTasks = await prisma.task.findMany({
-      where: { assignedToId: friendUser.id, assignedById: viewingUser.id },
+      where: { 
+        assignedToId: friendUser.id, 
+        assignedById: viewingUser.id,
+        OR: [
+          { category: null },
+          { category: { not: "dashboard" } }
+        ]
+      },
       include: { assignedTo: true, assignedBy: true },
       orderBy: { createdAt: 'desc' }
     });

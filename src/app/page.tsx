@@ -16,7 +16,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
   const displayDate = format(new Date(), "EEEE, MMMM d, yyyy").toUpperCase();
   
   const todayTasks = await prisma.task.findMany({
-    where: { assignedToId: viewingUser.id, date: todayStr, status: "pending" },
+    where: { assignedToId: viewingUser.id, date: todayStr, status: "pending", category: "dashboard" },
     include: { assignedTo: true }
   });
 
@@ -64,6 +64,7 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
                 status="pending" 
                 defaultAssigneeId={viewingUser.id}
                 hideAssigneeDropdown={true}
+                category="dashboard"
               />
 
               {todayTasks.length === 0 && (
