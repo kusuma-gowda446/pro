@@ -82,6 +82,7 @@ model Note {
   pinned      Boolean  @default(false)
   favorite    Boolean  @default(false)
   archived    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
   
   userId      String
   user        User     @relation(fields: [userId], references: [id])

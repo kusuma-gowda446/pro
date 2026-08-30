@@ -18,6 +18,7 @@ export default async function NotesPage() {
         userId={viewingUser.id} 
         isOwner={isOwner}
         currentUserId={currentUser.id}
+        currentUserName={currentUser.name}
       />
     </div>
   );

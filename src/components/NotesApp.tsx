@@ -2,16 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { createNote, updateNote, deleteNote, addAttachment } from "@/app/actions/notes";
-import { FileText, Star, Archive, Pin, Search, Plus, Paperclip, Trash2 } from "lucide-react";
+import { FileText, Star, Archive, Pin, Search, Plus, Paperclip, Trash2, Lock, Unlock } from "lucide-react";
 import { format } from "date-fns";
 
-export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) {
+export function NotesApp({ initialNotes, userId, isOwner, currentUserId, currentUserName = "" }: any) {
   const [notes, setNotes] = useState(initialNotes);
   const [selectedNoteId, setSelectedNoteId] = useState(notes[0]?.id || null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all"); // all, pinned, favorites
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
+  
+  const [unlockedNotes, setUnlockedNotes] = useState<Set<string>>(new Set());
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   
   const filteredNotes = notes.filter((n: any) => {
     if (search && !n.title?.toLowerCase().includes(search.toLowerCase()) && !n.content.toLowerCase().includes(search.toLowerCase())) return false;
@@ -142,6 +146,9 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
                       <Trash2 size={14} color="var(--text-secondary-brown)" />
                     </button>
                   )}
+                  {note.isLocked && (
+                    <Lock size={14} color="var(--text-secondary-brown)" style={{ opacity: 0.7 }} />
+                  )}
                 </div>
               </div>
               <div className="text-muted" style={{ fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '8px' }}>
@@ -168,6 +175,23 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
               </div>
               {isOwner && (
                 <div style={{ display: 'flex', gap: '12px' }}>
+                  <button onClick={() => {
+                    handleUpdate(selectedNote.id, { isLocked: !selectedNote.isLocked });
+                    if (!selectedNote.isLocked) {
+                      // Note is being locked. Remove from unlocked set just in case.
+                      setUnlockedNotes(prev => {
+                        const next = new Set(prev);
+                        next.delete(selectedNote.id);
+                        return next;
+                      });
+                    }
+                  }} title={selectedNote.isLocked ? "Unlock Note" : "Lock Note"}>
+                    {selectedNote.isLocked ? (
+                      <Lock size={18} color="var(--text-dark-brown)" />
+                    ) : (
+                      <Unlock size={18} color="var(--text-secondary-brown)" />
+                    )}
+                  </button>
                   <button onClick={() => handleUpdate(selectedNote.id, { pinned: !selectedNote.pinned })} title="Pin">
                     <Pin size={18} color={selectedNote.pinned ? "var(--text-dark-brown)" : "var(--text-secondary-brown)"} />
                   </button>
@@ -188,53 +212,100 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
               )}
             </div>
             
-            <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
-              <input 
-                type="text" 
-                value={selectedNote.title || ''}
-                onChange={e => handleUpdate(selectedNote.id, { title: e.target.value })}
-                placeholder="Note Title"
-                disabled={!isOwner}
-                style={{ fontSize: '2rem', fontWeight: 'bold', border: 'none', background: 'none', padding: 0, marginBottom: '24px', color: 'var(--text-primary)' }}
-              />
-              <textarea
-                value={selectedNote.content || ''}
-                onChange={e => handleUpdate(selectedNote.id, { content: e.target.value })}
-                placeholder="Start typing..."
-                disabled={!isOwner}
-                style={{ width: '100%', minHeight: '300px', border: 'none', background: 'none', resize: 'none', fontSize: '1.1rem', padding: 0, lineHeight: 1.6, color: 'var(--text-primary)' }}
-              />
-              
-              {/* Attachments Section */}
-              <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-secondary)' }}>Attachments</h3>
-                  {isOwner && (
-                    <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-color)', fontSize: '0.9rem', fontWeight: '500' }}>
-                      <Paperclip size={16} /> Add File
-                      <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} disabled={isUploading} />
-                    </label>
-                  )}
-                </div>
+            {selectedNote.isLocked && !unlockedNotes.has(selectedNote.id) ? (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', background: 'var(--bg-card)' }}>
+                <Lock size={48} color="var(--text-secondary-brown)" style={{ marginBottom: '20px', opacity: 0.5 }} />
+                <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-dark-brown)' }}>This note is locked</h3>
+                <p className="text-muted" style={{ marginBottom: '24px' }}>Please enter your favorite color to unlock it.</p>
                 
-                {isUploading && <div className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '12px' }}>Uploading...</div>}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const expectedColor = currentUserName.toLowerCase().includes("kiddo") ? "grey" : "blue";
+                    
+                    if (passwordInput.toLowerCase().trim() === expectedColor) {
+                      setUnlockedNotes(prev => new Set(prev).add(selectedNote.id));
+                      setPasswordInput("");
+                      setPasswordError(false);
+                    } else {
+                      setPasswordError(true);
+                    }
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', width: '100%', maxWidth: '300px' }}
+                >
+                  <input 
+                    type="password" 
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError(false);
+                    }}
+                    placeholder="Enter color..."
+                    style={{ 
+                      width: '100%', 
+                      padding: '12px 16px', 
+                      fontSize: '1.1rem', 
+                      textAlign: 'center',
+                      border: passwordError ? '2px solid #e74c3c' : '1px solid var(--border-soft-brown)',
+                      borderRadius: '8px',
+                      background: 'var(--bg-cream)'
+                    }}
+                  />
+                  {passwordError && <span style={{ color: '#e74c3c', fontSize: '0.85rem' }}>Incorrect color! Try again.</span>}
+                  <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                    Unlock Note
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+                <input 
+                  type="text" 
+                  value={selectedNote.title || ''}
+                  onChange={e => handleUpdate(selectedNote.id, { title: e.target.value })}
+                  placeholder="Note Title"
+                  disabled={!isOwner}
+                  style={{ fontSize: '2rem', fontWeight: 'bold', border: 'none', background: 'none', padding: 0, marginBottom: '24px', color: 'var(--text-dark-brown)' }}
+                />
+                <textarea 
+                  value={selectedNote.content || ''}
+                  onChange={e => handleUpdate(selectedNote.id, { content: e.target.value })}
+                  placeholder="Start typing your note here..."
+                  className="font-handwriting"
+                  disabled={!isOwner}
+                  style={{ width: '100%', height: '100%', minHeight: '300px', border: 'none', background: 'none', resize: 'none', fontSize: '1.4rem', lineHeight: '1.8' }}
+                />
                 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                  {selectedNote.attachments?.map((att: any) => (
-                    <a key={att.id} href={att.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
-                      <FileText size={24} color="var(--text-secondary-brown)" />
-                      <div>
-                        <div style={{ color: 'var(--text-primary)', fontWeight: '500', fontSize: '0.9rem' }}>{att.fileName}</div>
-                        <div className="text-muted" style={{ fontSize: '0.8rem' }}>{(att.fileSize / 1024).toFixed(1)} KB • {att.fileType || 'Unknown'}</div>
-                      </div>
-                    </a>
-                  ))}
-                  {(!selectedNote.attachments || selectedNote.attachments.length === 0) && (
-                    <div className="text-muted" style={{ fontSize: '0.9rem' }}>No attachments.</div>
-                  )}
+                <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-secondary)' }}>Attachments</h3>
+                    {isOwner && (
+                      <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-color)', fontSize: '0.9rem', fontWeight: '500' }}>
+                        <Paperclip size={16} /> Add File
+                        <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} disabled={isUploading} />
+                      </label>
+                    )}
+                  </div>
+                  
+                  {isUploading && <div className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '12px' }}>Uploading...</div>}
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                    {selectedNote.attachments?.map((att: any) => (
+                      <a key={att.id} href={att.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
+                        <FileText size={24} color="var(--text-secondary-brown)" />
+                        <div>
+                          <div style={{ color: 'var(--text-dark-brown)', fontWeight: '500', fontSize: '0.9rem' }}>{att.fileName}</div>
+                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>{(att.fileSize / 1024).toFixed(1)} KB • {att.fileType || 'Unknown'}</div>
+                        </div>
+                      </a>
+                    ))}
+                    {(!selectedNote.attachments || selectedNote.attachments.length === 0) && (
+                      <div className="text-muted" style={{ fontSize: '0.9rem' }}>No attachments.</div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         ) : (
           <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary-brown)' }}>
