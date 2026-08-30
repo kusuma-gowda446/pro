@@ -25,7 +25,7 @@ export function TaskItem({ task, currentUserId }: { task: any, currentUserId: st
   );
 }
 
-export function TaskForm({ currentUserId, friendUserId, date, status = "pending" }: { currentUserId: string, friendUserId: string, date: string, status?: string }) {
+export function TaskForm({ currentUserId, friendUserId, date, status = "pending", defaultAssigneeId }: { currentUserId: string, friendUserId: string, date: string, status?: string, defaultAssigneeId?: string }) {
   return (
     <form action={addTask} className="flex-row items-center lined-paper mt-4">
       <div className="checklist-circle" style={{ border: '2px dashed var(--border-soft-brown)' }}></div>
@@ -40,7 +40,7 @@ export function TaskForm({ currentUserId, friendUserId, date, status = "pending"
         style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '1.4rem' }} 
         required
       />
-      <select name="assignedToId" defaultValue={currentUserId} style={{ width: 'auto', background: 'transparent', border: '1px dashed var(--border-soft-brown)' }}>
+      <select name="assignedToId" defaultValue={defaultAssigneeId || currentUserId} style={{ width: 'auto', background: 'transparent', border: '1px dashed var(--border-soft-brown)' }}>
         <option value={currentUserId}>For Me</option>
         <option value={friendUserId}>For Friend</option>
       </select>

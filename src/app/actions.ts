@@ -18,7 +18,7 @@ export async function toggleTask(taskId: string, status: string, userId: string)
     await logActivity("TASK_COMPLETED", "Completed a task", userId);
   }
   
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function addTask(formData: FormData) {
@@ -41,7 +41,7 @@ export async function addTask(formData: FormData) {
   });
   
   await logActivity("TASK_CREATED", `Added task: ${title}`, assignedById);
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function updateDailyReport(formData: FormData) {
@@ -125,6 +125,25 @@ export async function switchView(userId: string) {
   revalidatePath("/", "layout");
 }
 
+export async function verifyAndSwitchView(targetUserId: string, pin: string) {
+  const user = await prisma.user.findUnique({ where: { id: targetUserId } });
+  
+  if (!user || user.pin !== pin) {
+    return { success: false, error: "Incorrect PIN" };
+  }
+  
+  const cookieStore = await cookies();
+  cookieStore.set("notebook_view", targetUserId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
+    path: "/",
+  });
+  
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete("notebook_user");
@@ -132,15 +151,27 @@ export async function logout() {
 }
 
 export async function addRoadmapMilestone(roadmapId: string, title: string, userId: string) {
-  await prisma.roadmapItem.create({
-    data: { title, status: "pending", roadmapId }
+  const titles = title.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+  
+  if (titles.length === 0) return;
+
+  await prisma.roadmapItem.createMany({
+    data: titles.map(t => ({
+      title: t,
+      status: "pending",
+      roadmapId
+    }))
   });
   
+  const activityDetail = titles.length > 1 
+    ? `Added ${titles.length} milestones` 
+    : `Added milestone: ${titles[0]}`;
+    
   await prisma.activityLog.create({
-    data: { actionType: "MILESTONE_CREATED", details: `Added milestone: ${title}`, userId }
+    data: { actionType: "MILESTONE_CREATED", details: activityDetail, userId }
   });
   
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function createRoadmap(userId: string, title: string) {

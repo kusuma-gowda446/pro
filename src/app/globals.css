@@ -314,6 +314,24 @@ textarea {
 .mb-4 { margin-bottom: 1rem; }
 .text-center { text-align: center; }
 
+/* Responsive Layout Helpers */
+.responsive-grid {
+  display: flex;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+
+.responsive-col {
+  flex: 1 1 300px;
+  max-width: 100%;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* Status Badges */
 .status-badge {
   padding: 2px 8px;
@@ -340,9 +358,26 @@ textarea {
     width: 100%;
     border-right: none;
     border-bottom: 2px dashed var(--border-soft-brown);
-    padding: 50px 20px 20px 20px;
+    padding: 30px 20px 20px 20px;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .nav-link {
+    font-size: 1.1rem;
+    padding: 6px 12px;
   }
   .main-content {
-    padding: 20px;
+    padding: 20px 15px;
+  }
+  .responsive-grid {
+    flex-direction: column;
+    gap: 30px;
+  }
+  .responsive-col {
+    flex-basis: auto;
   }
 }

@@ -25,10 +25,8 @@ export function Sidebar() {
     { href: "/notes", label: "Notes", icon: <BookOpen size={18} /> },
     { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} /> },
     { href: "/roadmap", label: "Roadmap", icon: <Map size={18} /> },
-    { href: "/learning", label: "Learning", icon: <GraduationCap size={18} /> },
     { href: "/tests", label: "Tests", icon: <FlaskConical size={18} /> },
     { href: "/results", label: "Results", icon: <BarChart2 size={18} /> },
-    { href: "/activity", label: "Activity", icon: <Clock size={18} /> },
   ];
   
   return (
@@ -42,7 +40,7 @@ export function Sidebar() {
         </div>
       </div>
       
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <nav className="sidebar-nav">
         {navItems.map(item => (
           <Link 
             key={item.href} 
