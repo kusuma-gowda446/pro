@@ -50,7 +50,7 @@ export function TestsApp({ initialTests, topics, userId, isOwner, currentUserId 
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: '1rem', fontStyle: 'italic', color: 'var(--text-tertiary)' }}>Not taken yet</div>
+                  <div style={{ fontSize: '1rem', fontStyle: 'italic', color: 'var(--text-secondary-brown)' }}>Not taken yet</div>
                 )}
               </div>
               

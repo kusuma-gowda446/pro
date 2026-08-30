@@ -39,7 +39,7 @@ export function DeleteButton({
       }}
       title={title}
     >
-      <Trash2 size={size} color="var(--text-tertiary)" />
+      <Trash2 size={size} color="var(--text-secondary-brown)" />
     </button>
   );
 }

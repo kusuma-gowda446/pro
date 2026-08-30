@@ -60,7 +60,7 @@ export default async function TrashPage() {
               <div style={{ padding: '20px' }}>
                 {groupedItems[dateStr].map(item => (
                   <div key={item.id} className="lined-paper" style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px', borderLeft: '3px solid var(--text-secondary-brown)' }}>
-                    <div style={{ color: 'var(--text-tertiary)' }} title={item.itemType}>
+                    <div style={{ color: 'var(--text-secondary-brown)' }} title={item.itemType}>
                       {getIconForType(item.itemType)}
                     </div>
                     <div style={{ flex: 1 }}>

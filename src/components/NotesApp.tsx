@@ -87,7 +87,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
       <div style={{ width: '300px', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
         <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ position: 'relative' }}>
-            <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-tertiary)' }} />
+            <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-secondary-brown)' }} />
             <input 
               type="text" 
               placeholder="Search notes..." 
@@ -139,7 +139,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
                       }}
                       title="Delete Note"
                     >
-                      <Trash2 size={14} color="var(--text-tertiary)" />
+                      <Trash2 size={14} color="var(--text-secondary-brown)" />
                     </button>
                   )}
                 </div>
@@ -147,13 +147,13 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
               <div className="text-muted" style={{ fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '8px' }}>
                 {note.content.substring(0, 50) || 'No content...'}
               </div>
-              <div className="text-tertiary" style={{ fontSize: '0.75rem' }}>
+              <div className="text-muted" style={{ fontSize: '0.75rem' }}>
                 {format(new Date(note.updatedAt), "MMM d, h:mm a")}
               </div>
             </div>
           ))}
           {filteredNotes.length === 0 && (
-            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-tertiary)' }}>No notes found.</div>
+            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary-brown)' }}>No notes found.</div>
           )}
         </div>
       </div>
@@ -169,19 +169,19 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
               {isOwner && (
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button onClick={() => handleUpdate(selectedNote.id, { pinned: !selectedNote.pinned })} title="Pin">
-                    <Pin size={18} color={selectedNote.pinned ? "var(--accent-color)" : "var(--text-tertiary)"} />
+                    <Pin size={18} color={selectedNote.pinned ? "var(--text-dark-brown)" : "var(--text-secondary-brown)"} />
                   </button>
                   <button onClick={() => handleUpdate(selectedNote.id, { favorite: !selectedNote.favorite })} title="Favorite">
-                    <Star size={18} color={selectedNote.favorite ? "#FFD700" : "var(--text-tertiary)"} fill={selectedNote.favorite ? "#FFD700" : "none"} />
+                    <Star size={18} color={selectedNote.favorite ? "#FFD700" : "var(--text-secondary-brown)"} fill={selectedNote.favorite ? "#FFD700" : "none"} />
                   </button>
                   <button onClick={() => handleUpdate(selectedNote.id, { archived: !selectedNote.archived })} title="Archive">
-                    <Archive size={18} color={selectedNote.archived ? "var(--accent-color)" : "var(--text-tertiary)"} />
+                    <Archive size={18} color={selectedNote.archived ? "var(--text-dark-brown)" : "var(--text-secondary-brown)"} />
                   </button>
                   <button onClick={() => {
                     if (confirm('Are you sure you want to delete this note?')) {
                       handleDelete(selectedNote.id);
                     }
-                  }} title="Delete" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>
+                  }} title="Delete" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary-brown)', fontSize: '0.9rem' }}>
                     <Trash2 size={18} /> Delete
                   </button>
                 </div>
@@ -222,7 +222,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   {selectedNote.attachments?.map((att: any) => (
                     <a key={att.id} href={att.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
-                      <FileText size={24} color="var(--text-tertiary)" />
+                      <FileText size={24} color="var(--text-secondary-brown)" />
                       <div>
                         <div style={{ color: 'var(--text-primary)', fontWeight: '500', fontSize: '0.9rem' }}>{att.fileName}</div>
                         <div className="text-muted" style={{ fontSize: '0.8rem' }}>{(att.fileSize / 1024).toFixed(1)} KB • {att.fileType || 'Unknown'}</div>
@@ -237,7 +237,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId }: any) 
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+          <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary-brown)' }}>
             Select a note to view or create a new one.
           </div>
         )}
