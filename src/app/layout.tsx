@@ -57,6 +57,18 @@ export default async function RootLayout({
 
   const { currentUser, viewingUser } = await getViewingUser();
   const friendUser = await getFriendUser(currentUser.id);
+  
+  let pendingTasksFromPartner = 0;
+  if (friendUser) {
+    const { prisma } = await import("@/lib/db");
+    pendingTasksFromPartner = await prisma.task.count({
+      where: {
+        assignedToId: currentUser.id,
+        assignedById: friendUser.id,
+        status: "pending"
+      }
+    });
+  }
 
   return (
     <html lang="en">
@@ -64,7 +76,7 @@ export default async function RootLayout({
         <div className="notebook-container">
           <SpiralBinding />
           <div className="app-container">
-            <Sidebar />
+            <Sidebar pendingTasksCount={pendingTasksFromPartner} />
             <main className="main-content">
               <div className="topbar">
                 <div style={{ fontFamily: 'var(--font-lora)', fontSize: '1.5rem', fontWeight: 'bold' }}>

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { logout } from "@/app/actions";
 
-export function Sidebar() {
+export function Sidebar({ pendingTasksCount = 0 }: { pendingTasksCount?: number }) {
   const pathname = usePathname();
   
   if (pathname === "/login") return null;
@@ -24,7 +24,7 @@ export function Sidebar() {
   const navItems = [
     { href: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { href: "/notes", label: "Notes", icon: <BookOpen size={18} /> },
-    { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} /> },
+    { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} />, badge: pendingTasksCount > 0 },
     { href: "/roadmap", label: "Roadmap", icon: <Map size={18} /> },
     { href: "/tests", label: "Tests", icon: <FlaskConical size={18} /> },
     { href: "/results", label: "Results", icon: <BarChart2 size={18} /> },
@@ -48,9 +48,23 @@ export function Sidebar() {
             key={item.href} 
             href={item.href}
             className={`nav-link ${pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/') ? 'active' : ''}`}
+            style={{ position: 'relative' }}
           >
             <span style={{ opacity: pathname === item.href ? 1 : 0.7 }}>{item.icon}</span>
             {item.label}
+            {item.badge && (
+              <span style={{
+                position: 'absolute',
+                top: '50%',
+                right: '10px',
+                transform: 'translateY(-50%)',
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#e74c3c',
+                borderRadius: '50%',
+                boxShadow: '0 0 4px rgba(231, 76, 60, 0.6)'
+              }} />
+            )}
           </Link>
         ))}
       </nav>
