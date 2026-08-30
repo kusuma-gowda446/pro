@@ -15,10 +15,15 @@ function getIconForType(type: string) {
 }
 
 export default async function TrashPage() {
-  const { viewingUser } = await getViewingUser();
+  const { viewingUser, currentUser } = await getViewingUser();
   
   const trashItems = await prisma.trashItem.findMany({
-    where: { userId: viewingUser.id },
+    where: { 
+      OR: [
+        { userId: viewingUser.id },
+        { userId: currentUser.id }
+      ]
+    },
     orderBy: { deletedAt: 'desc' }
   });
 
@@ -40,7 +45,7 @@ export default async function TrashPage() {
           TRASH
         </h2>
         <div style={{ color: 'var(--text-secondary-brown)', marginTop: '8px' }} className="font-handwriting">
-          History of deleted items for {viewingUser.name}
+          History of deleted items for {viewingUser.id === currentUser.id ? viewingUser.name : `${currentUser.name} & ${viewingUser.name}`}
         </div>
       </div>
 
@@ -57,15 +62,25 @@ export default async function TrashPage() {
                 <span className="text-muted" style={{ fontSize: '0.9rem' }}>{groupedItems[dateStr].length} items</span>
               </summary>
               
-              <div style={{ padding: '20px' }}>
+              <div style={{ padding: '20px' }} className="lined-paper">
                 {groupedItems[dateStr].map(item => (
-                  <div key={item.id} className="lined-paper" style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px', borderLeft: '3px solid var(--text-secondary-brown)' }}>
+                  <div key={item.id} style={{ 
+                    padding: '12px 16px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '16px', 
+                    marginBottom: '12px', 
+                    borderLeft: '3px solid var(--text-secondary-brown)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                    borderRadius: '0 8px 8px 0',
+                    lineHeight: '1.2'
+                  }}>
                     <div style={{ color: 'var(--text-secondary-brown)' }} title={item.itemType}>
                       {getIconForType(item.itemType)}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{item.itemTitle}</div>
-                      <div className="text-muted" style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                      <div style={{ fontWeight: 'bold', color: 'var(--text-dark-brown)', fontSize: '1.2rem' }}>{item.itemTitle}</div>
+                      <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '2px' }}>
                         {item.itemType} • Deleted at {format(new Date(item.deletedAt), 'h:mm a')}
                       </div>
                     </div>

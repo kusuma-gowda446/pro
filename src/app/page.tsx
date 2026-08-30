@@ -17,12 +17,12 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
   
   const todayTasks = await prisma.task.findMany({
     where: { assignedToId: viewingUser.id, date: todayStr, status: "pending", category: "dashboard" },
-    include: { assignedTo: true }
+    include: { assignedTo: true, assignedBy: true }
   });
 
   const currentlyDoingTasks = await prisma.task.findMany({
     where: { assignedToId: viewingUser.id, status: "in-progress" },
-    include: { assignedTo: true }
+    include: { assignedTo: true, assignedBy: true }
   });
   
   const currentRoadmaps = await prisma.roadmap.findMany({
