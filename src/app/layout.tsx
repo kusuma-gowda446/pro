@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Caveat, Lora } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
@@ -21,6 +21,13 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: "Motu — My Notebook",
   description: "A private digital workspace for Motu",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 function SpiralBinding() {
