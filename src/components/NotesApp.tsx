@@ -18,7 +18,12 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId, current
   const [passwordError, setPasswordError] = useState(false);
   
   const filteredNotes = notes.filter((n: any) => {
-    if (search && !n.title?.toLowerCase().includes(search.toLowerCase()) && !n.content.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      const matchesTitle = n.title?.toLowerCase().includes(searchLower);
+      const matchesContent = !n.isLocked && n.content.toLowerCase().includes(searchLower);
+      if (!matchesTitle && !matchesContent) return false;
+    }
     if (filter === "pinned" && !n.pinned) return false;
     if (filter === "favorites" && !n.favorite) return false;
     if (filter === "archived") return n.archived;
@@ -151,9 +156,17 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId, current
                   )}
                 </div>
               </div>
-              <div className="text-muted" style={{ fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '8px' }}>
-                {note.content.substring(0, 50) || 'No content...'}
-              </div>
+              
+              {!note.isLocked ? (
+                <div className="text-muted" style={{ fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '8px' }}>
+                  {note.content.substring(0, 50) || 'No content...'}
+                </div>
+              ) : (
+                <div className="text-muted" style={{ fontSize: '0.8rem', fontStyle: 'italic', marginBottom: '8px', opacity: 0.7 }}>
+                  Content is locked
+                </div>
+              )}
+              
               <div className="text-muted" style={{ fontSize: '0.75rem' }}>
                 {format(new Date(note.updatedAt), "MMM d, h:mm a")}
               </div>
