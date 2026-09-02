@@ -49,7 +49,14 @@ export default async function RootLayout({
     return (
       <html lang="en">
         <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
-          {children}
+          <div className="notebook-container">
+            <SpiralBinding />
+            <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', padding: '40px' }}>
+                {children}
+              </main>
+            </div>
+          </div>
         </body>
       </html>
     );

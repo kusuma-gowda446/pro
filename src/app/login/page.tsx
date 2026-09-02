@@ -28,7 +28,7 @@ async function loginAction(formData: FormData) {
 
 export default function LoginPage() {
   return (
-    <div className="flex-col items-center text-center page-turn-anim" style={{ marginTop: '10vh' }}>
+    <div className="flex-col items-center text-center page-turn-anim" style={{ width: '100%' }}>
       <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem', fontFamily: 'var(--font-lora)' }}>MOTU NOTEBOOK</h1>
       <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-caveat)', color: 'var(--text-secondary-brown)', marginBottom: '3rem', fontStyle: 'italic' }}>
         My little notebook
