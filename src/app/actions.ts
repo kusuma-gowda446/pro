@@ -24,8 +24,7 @@ export async function toggleTask(taskId: string, status: string, userId: string)
 export async function addTask(formData: FormData) {
   const title = formData.get("title") as string;
   const date = formData.get("date") as string;
-  const assignedById = formData.get("assignedById") as string;
-  const assignedToId = formData.get("assignedToId") as string;
+  const userId = formData.get("userId") as string;
   const status = (formData.get("status") as string) || "pending";
   const category = (formData.get("category") as string) || null;
   
@@ -35,14 +34,13 @@ export async function addTask(formData: FormData) {
     data: {
       title,
       date,
-      assignedById,
-      assignedToId,
+      userId,
       status,
       category
     }
   });
   
-  await logActivity("TASK_CREATED", `Added task: ${title}`, assignedById);
+  await logActivity("TASK_CREATED", `Added task: ${title}`, userId);
   revalidatePath("/", "layout");
 }
 

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, Lora } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
-import { DashboardSwitcher } from "@/components/DashboardSwitcher";
-import { getViewingUser, getFriendUser } from "@/lib/auth";
+import { getViewingUser } from "@/lib/auth";
 import { cookies } from "next/headers";
 
 const lora = Lora({
@@ -19,8 +18,8 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Buddy × Kiddo — Our Notebook",
-  description: "A private shared digital workspace for Buddy and Kiddo",
+  title: "Motu — My Notebook",
+  description: "A private digital workspace for Motu",
 };
 
 function SpiralBinding() {
@@ -56,19 +55,6 @@ export default async function RootLayout({
   }
 
   const { currentUser, viewingUser } = await getViewingUser();
-  const friendUser = await getFriendUser(currentUser.id);
-  
-  let pendingTasksFromPartner = 0;
-  if (friendUser) {
-    const { prisma } = await import("@/lib/db");
-    pendingTasksFromPartner = await prisma.task.count({
-      where: {
-        assignedToId: currentUser.id,
-        assignedById: friendUser.id,
-        status: "pending"
-      }
-    });
-  }
 
   return (
     <html lang="en">
@@ -76,19 +62,12 @@ export default async function RootLayout({
         <div className="notebook-container">
           <SpiralBinding />
           <div className="app-container">
-            <Sidebar pendingTasksCount={pendingTasksFromPartner} />
+            <Sidebar />
             <main className="main-content">
               <div className="topbar">
                 <div style={{ fontFamily: 'var(--font-lora)', fontSize: '1.5rem', fontWeight: 'bold' }}>
                   {viewingUser.name}'s Notebook
                 </div>
-                {friendUser && (
-                  <DashboardSwitcher 
-                    currentUser={currentUser} 
-                    viewingUser={viewingUser} 
-                    friendUser={friendUser} 
-                  />
-                )}
               </div>
               <div style={{ flex: 1 }}>
                 {children}

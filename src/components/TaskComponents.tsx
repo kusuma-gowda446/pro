@@ -21,11 +21,6 @@ export function TaskItem({ task, currentUserId, isOwner = true }: { task: any, c
       <span className={`task-text font-handwriting ${isCompleted ? 'completed' : ''}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>
           {task.title}
-          {task.assignedToId !== task.assignedById && (
-            <span style={{ fontSize: '1rem', marginLeft: '8px', color: 'var(--text-secondary-brown)', textDecoration: 'none' }}>
-              (given by {task.assignedBy?.name})
-            </span>
-          )}
         </span>
         <button 
           onClick={(e) => {
@@ -46,30 +41,20 @@ export function TaskItem({ task, currentUserId, isOwner = true }: { task: any, c
 
 export function TaskForm({ 
   currentUserId, 
-  friendUserId, 
-  currentUserName = "Me",
-  friendUserName = "Partner",
   date, 
   status = "pending", 
-  defaultAssigneeId,
-  hideAssigneeDropdown = false,
   category = ""
 }: { 
   currentUserId: string, 
-  friendUserId: string, 
-  currentUserName?: string,
-  friendUserName?: string,
   date: string, 
   status?: string, 
-  defaultAssigneeId?: string,
-  hideAssigneeDropdown?: boolean,
   category?: string
 }) {
   return (
     <form action={addTask} className="flex-row items-center lined-paper mt-4">
       <div className="checklist-circle" style={{ border: '2px dashed var(--border-soft-brown)' }}></div>
       <input type="hidden" name="date" value={date} />
-      <input type="hidden" name="assignedById" value={currentUserId} />
+      <input type="hidden" name="userId" value={currentUserId} />
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="category" value={category} />
       <input 
@@ -80,19 +65,6 @@ export function TaskForm({
         style={{ flex: 1, border: 'none', background: 'transparent', fontSize: '1.4rem' }} 
         required
       />
-      {hideAssigneeDropdown ? (
-        <input type="hidden" name="assignedToId" value={defaultAssigneeId || currentUserId} />
-      ) : (
-        <select 
-          name="assignedToId" 
-          defaultValue={defaultAssigneeId || currentUserId}
-          className="font-handwriting"
-          style={{ border: 'none', background: 'transparent', fontSize: '1rem', color: 'var(--text-secondary-brown)', marginRight: '10px' }}
-        >
-          <option value={currentUserId}>For {currentUserName}</option>
-          <option value={friendUserId}>For {friendUserName}</option>
-        </select>
-      )}
       <button type="submit" className="btn-secondary" style={{ padding: '2px 12px', fontSize: '1rem', fontFamily: 'var(--font-caveat)' }}>Add</button>
     </form>
   );

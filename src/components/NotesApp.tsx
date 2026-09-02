@@ -221,7 +221,7 @@ export function NotesApp({ initialNotes, userId, isOwner, currentUserId, current
                 <form 
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const expectedColor = currentUserName.toLowerCase().includes("kiddo") ? "grey" : "blue";
+                    const expectedColor = currentUserName.toLowerCase().includes("motu") ? "grey" : "blue";
                     
                     if (passwordInput.toLowerCase().trim() === expectedColor) {
                       setUnlockedNotes(prev => new Set(prev).add(selectedNote.id));

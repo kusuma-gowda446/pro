@@ -3,21 +3,20 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id               String          @id @default(uuid())
-  name             String          // "Buddy" or "Kiddo"
+  name             String          // "Motu"
   pin              String          @unique // "4421" or "4426"
   streak           Int             @default(0)
   roadmap_progress Int             @default(0)
   currentActivity  String?
   createdAt        DateTime        @default(now())
   
-  tasksAssignedBy  Task[]          @relation("AssignedBy")
-  tasksAssignedTo  Task[]          @relation("AssignedTo")
+  tasks            Task[]
   priorities       Priority[]
   notes            Note[]
   gratitudes       Gratitude[]
@@ -46,10 +45,8 @@ model Task {
   deadline     DateTime?
   completedAt  DateTime?
   
-  assignedById String
-  assignedBy   User      @relation("AssignedBy", fields: [assignedById], references: [id])
-  assignedToId String
-  assignedTo   User      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
   
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -127,7 +124,7 @@ model DailyReport {
 model Roadmap {
   id            String        @id @default(uuid())
   title         String
-  type          String        // "Buddy", "Kiddo", "Shared"
+  type          String        // "Personal", "Work", etc.
   description   String?
   status        String        @default("In Progress")
   progress      Int           @default(0)

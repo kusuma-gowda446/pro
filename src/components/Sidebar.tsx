@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { logout } from "@/app/actions";
 
-export function Sidebar({ pendingTasksCount = 0 }: { pendingTasksCount?: number }) {
+export function Sidebar() {
   const pathname = usePathname();
   
   if (pathname === "/login") return null;
@@ -24,7 +24,7 @@ export function Sidebar({ pendingTasksCount = 0 }: { pendingTasksCount?: number 
   const navItems = [
     { href: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { href: "/notes", label: "Notes", icon: <BookOpen size={18} /> },
-    { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} />, badge: pendingTasksCount > 0 },
+    { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} /> },
     { href: "/roadmap", label: "Roadmap", icon: <Map size={18} /> },
     { href: "/tests", label: "Tests", icon: <FlaskConical size={18} /> },
     { href: "/results", label: "Results", icon: <BarChart2 size={18} /> },
@@ -35,10 +35,10 @@ export function Sidebar({ pendingTasksCount = 0 }: { pendingTasksCount?: number 
     <aside className="sidebar">
       <div style={{ padding: '10px 16px', marginBottom: '20px' }}>
         <h2 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--text-dark-brown)', letterSpacing: '-0.02em', fontFamily: 'var(--font-lora)' }}>
-          Buddy <span style={{ color: 'var(--text-secondary-brown)', fontSize: '1.1rem' }}>&times;</span> Kiddo
+          Motu Notebook
         </h2>
         <div className="font-handwriting" style={{ color: 'var(--text-secondary-brown)', marginTop: '-4px' }}>
-          Our Workspace
+          My Workspace
         </div>
       </div>
       
@@ -52,19 +52,6 @@ export function Sidebar({ pendingTasksCount = 0 }: { pendingTasksCount?: number 
           >
             <span style={{ opacity: pathname === item.href ? 1 : 0.7 }}>{item.icon}</span>
             {item.label}
-            {item.badge && (
-              <span style={{
-                position: 'absolute',
-                top: '50%',
-                right: '10px',
-                transform: 'translateY(-50%)',
-                width: '8px',
-                height: '8px',
-                backgroundColor: '#e74c3c',
-                borderRadius: '50%',
-                boxShadow: '0 0 4px rgba(231, 76, 60, 0.6)'
-              }} />
-            )}
           </Link>
         ))}
       </nav>

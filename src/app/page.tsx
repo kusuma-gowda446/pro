@@ -1,4 +1,4 @@
-import { getViewingUser, getFriendUser } from "@/lib/auth";
+import { getViewingUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { format } from "date-fns";
 import { TaskItem, TaskForm } from "@/components/TaskComponents";
@@ -10,19 +10,16 @@ import { RoadmapSelector } from "@/components/RoadmapSelector";
 export default async function DashboardPage(props: { searchParams: Promise<{ roadmapId?: string }> }) {
   const searchParams = await props.searchParams;
   const { viewingUser, currentUser, isOwner } = await getViewingUser();
-  const friendUser = await getFriendUser(currentUser.id);
   
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const displayDate = format(new Date(), "EEEE, MMMM d, yyyy").toUpperCase();
   
   const todayTasks = await prisma.task.findMany({
-    where: { assignedToId: viewingUser.id, date: todayStr, status: "pending", category: "dashboard" },
-    include: { assignedTo: true, assignedBy: true }
+    where: { userId: viewingUser.id, date: todayStr, status: "pending", category: "dashboard" }
   });
 
   const currentlyDoingTasks = await prisma.task.findMany({
-    where: { assignedToId: viewingUser.id, status: "in-progress" },
-    include: { assignedTo: true, assignedBy: true }
+    where: { userId: viewingUser.id, status: "in-progress" }
   });
   
   const currentRoadmaps = await prisma.roadmap.findMany({
@@ -57,13 +54,8 @@ export default async function DashboardPage(props: { searchParams: Promise<{ roa
               ))}
               <TaskForm 
                 currentUserId={currentUser.id} 
-                friendUserId={friendUser?.id || currentUser.id} 
-                currentUserName={currentUser.name}
-                friendUserName={viewingUser.name}
                 date={todayStr} 
                 status="pending" 
-                defaultAssigneeId={viewingUser.id}
-                hideAssigneeDropdown={true}
                 category="dashboard"
               />
 
