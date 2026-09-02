@@ -51,8 +51,8 @@ export default async function RootLayout({
         <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
           <div className="notebook-container">
             <SpiralBinding />
-            <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <main style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', padding: '40px' }}>
+            <div className="app-container">
+              <main className="main-content" style={{ justifyContent: 'center', alignItems: 'center' }}>
                 {children}
               </main>
             </div>
