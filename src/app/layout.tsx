@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Caveat, Lora } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
+import { AutoLock } from "@/components/AutoLock";
 import { getViewingUser } from "@/lib/auth";
 import { cookies } from "next/headers";
 
@@ -59,6 +60,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${lora.variable} ${caveat.variable} ${lora.className}`}>
+        <AutoLock />
         <div className="notebook-container">
           <SpiralBinding />
           <div className="app-container">
