@@ -1,6 +1,6 @@
 import { getViewingUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { Trash2, FileText, CheckCircle, Map, Layout, HelpCircle } from "lucide-react";
 
 function getIconForType(type: string) {
@@ -16,6 +16,18 @@ function getIconForType(type: string) {
 
 export default async function TrashPage() {
   const { viewingUser, currentUser } = await getViewingUser();
+  
+  // Cleanup items older than 15 days
+  const fifteenDaysAgo = new Date();
+  fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+  
+  await prisma.trashItem.deleteMany({
+    where: {
+      deletedAt: {
+        lt: fifteenDaysAgo
+      }
+    }
+  });
   
   const trashItems = await prisma.trashItem.findMany({
     where: { 
@@ -46,6 +58,8 @@ export default async function TrashPage() {
         </h2>
         <div style={{ color: 'var(--text-secondary-brown)', marginTop: '8px' }} className="font-handwriting">
           History of deleted items for {viewingUser.id === currentUser.id ? viewingUser.name : `${currentUser.name} & ${viewingUser.name}`}
+          <br />
+          <span style={{ fontSize: '0.85em', opacity: 0.8 }}>Items are permanently deleted after 15 days.</span>
         </div>
       </div>
 
@@ -63,29 +77,33 @@ export default async function TrashPage() {
               </summary>
               
               <div style={{ padding: '20px' }} className="lined-paper">
-                {groupedItems[dateStr].map(item => (
-                  <div key={item.id} style={{ 
-                    padding: '12px 16px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '16px', 
-                    marginBottom: '12px', 
-                    borderLeft: '3px solid var(--text-secondary-brown)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-                    borderRadius: '0 8px 8px 0',
-                    lineHeight: '1.2'
-                  }}>
-                    <div style={{ color: 'var(--text-secondary-brown)' }} title={item.itemType}>
-                      {getIconForType(item.itemType)}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 'bold', color: 'var(--text-dark-brown)', fontSize: '1.2rem' }}>{item.itemTitle}</div>
-                      <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '2px' }}>
-                        {item.itemType} • Deleted at {format(new Date(item.deletedAt), 'h:mm a')}
+                {groupedItems[dateStr].map(item => {
+                  const daysLeft = Math.max(0, 15 - differenceInDays(new Date(), new Date(item.deletedAt)));
+                  return (
+                    <div key={item.id} style={{ 
+                      padding: '12px 16px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '16px', 
+                      marginBottom: '12px', 
+                      borderLeft: '3px solid var(--text-secondary-brown)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                      borderRadius: '0 8px 8px 0',
+                      lineHeight: '1.2'
+                    }}>
+                      <div style={{ color: 'var(--text-secondary-brown)' }} title={item.itemType}>
+                        {getIconForType(item.itemType)}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-dark-brown)', fontSize: '1.2rem' }}>{item.itemTitle}</div>
+                        <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: '2px', display: 'flex', justifyContent: 'space-between' }}>
+                          <span>{item.itemType} • Deleted at {format(new Date(item.deletedAt), 'h:mm a')}</span>
+                          <span style={{ color: daysLeft <= 3 ? '#d97706' : 'inherit' }}>{daysLeft} {daysLeft === 1 ? 'day' : 'days'} left</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </details>
           ))
