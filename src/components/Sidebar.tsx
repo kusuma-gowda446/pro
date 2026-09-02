@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   BookOpen, 
-  CheckSquare, 
   Map, 
   GraduationCap, 
   FlaskConical, 
@@ -24,7 +23,6 @@ export function Sidebar() {
   const navItems = [
     { href: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { href: "/notes", label: "Notes", icon: <BookOpen size={18} /> },
-    { href: "/tasks", label: "Tasks", icon: <CheckSquare size={18} /> },
     { href: "/roadmap", label: "Roadmap", icon: <Map size={18} /> },
     { href: "/tests", label: "Tests", icon: <FlaskConical size={18} /> },
     { href: "/results", label: "Results", icon: <BarChart2 size={18} /> },
